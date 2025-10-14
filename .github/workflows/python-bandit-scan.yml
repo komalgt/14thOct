@@ -1,0 +1,29 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [ main ]  # Ensures scan runs on PRs to main
+
+jobs:
+  bandit:
+    name: Bandit Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'   # Use your preferred Python version
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit Security Scan
+        run: |
+          bandit -r . --exit-zero -f json -o bandit_report.json
+
+      - name: Block PR if Critical Vulnerabilities Found
+        run: |
+          python scripts/bandit_blocker.py
