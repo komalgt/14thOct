@@ -1,0 +1,54 @@
+name: Deploy Serverless and Notify
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./src
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy Serverless App
+        run: serverless deploy
+
+  notify-on-failure:
+    needs: deploy
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email on deploy failure
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Serverless Deploy Failed 🚨"
+          body: |
+            The deployment of your serverless app has failed on branch ${{ github.ref_name }}.
+            Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: ${{ secrets.TO_EMAIL }}
+          from: ${{ secrets.FROM_EMAIL }}
