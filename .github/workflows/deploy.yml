@@ -1,4 +1,4 @@
-name: Deploy Serverless and Notify
+name: Deploy Serverless and Notifyyy
 
 on:
   push:
