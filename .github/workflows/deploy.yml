@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,6 +24,8 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        # Change to `working-directory: ./src` **if** your package.json is in ./src.
+        # Otherwise, delete this line or set to '.'
         working-directory: ./src
 
       - name: Configure AWS credentials
@@ -29,14 +33,14 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: eu-north-1
 
       - name: Deploy Serverless App
         run: serverless deploy
 
   notify-on-failure:
     needs: deploy
-    if: failure()
+    if: ${{ failure() }}
     runs-on: ubuntu-latest
     steps:
       - name: Send email on deploy failure
