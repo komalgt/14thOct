@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEYs }}
+      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEYss }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
